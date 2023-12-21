@@ -1,6 +1,6 @@
-package dev.alexcoss.logging;
+package dev.alexcoss.util.logging;
 
-import dev.alexcoss.logging.exceptions.HandlerExceptions;
+import dev.alexcoss.util.logging.exceptions.HandlerExceptions;
 
 import java.io.IOException;
 import java.nio.file.Files;

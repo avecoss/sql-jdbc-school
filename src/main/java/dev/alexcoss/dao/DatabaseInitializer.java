@@ -1,43 +1,25 @@
 package dev.alexcoss.dao;
 
 import dev.alexcoss.dao.exceptions.DatabaseInitializerException;
-import dev.alexcoss.logging.FileHandlerInitializer;
-import dev.alexcoss.resourceUtils.FileReader;
-import dev.alexcoss.resourceUtils.JdbcPropertiesReader;
+import dev.alexcoss.util.logging.FileHandlerInitializer;
+import dev.alexcoss.util.FileReader;
 
 import java.sql.*;
 import java.util.logging.*;
 
 public class DatabaseInitializer {
-    private static final Logger logger = Logger.getLogger(DatabaseInitializer.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(DatabaseInitializer.class.getName());
 
     static {
-        FileHandlerInitializer.initializeFileHandler(logger, "database_initializer");
+        FileHandlerInitializer.initializeFileHandler(LOGGER, "database_initializer");
     }
 
     public DatabaseInitializer(String sqlPath) {
-        try (Connection connection = createConnection()) {
+        ConnectionFactory connectionFactory = new PostgreSqlConnectionFactory();
+        try (Connection connection = connectionFactory.getConnection()) {
             executeSqlScript(connection, sqlPath);
         } catch (SQLException e) {
-            String message = "Error initializing database";
-            logger.log(Level.SEVERE, message, e);
-            throw new DatabaseInitializerException(message, e);
-        }
-    }
-
-    private Connection createConnection() {
-        JdbcPropertiesReader reader = new JdbcPropertiesReader();
-
-        String url = reader.getJdbcUrl();
-        String username = reader.getJdbcUsername();
-        String password = reader.getJdbcPassword();
-
-        try {
-            Connection connection = DriverManager.getConnection(url, username, password);
-            logger.info("Database connection established");
-            return connection;
-        } catch (SQLException e) {
-            throw new DatabaseInitializerException("Error creating database connection", e);
+            handleSQLException(e, "Error initializing database");
         }
     }
 
@@ -46,11 +28,9 @@ public class DatabaseInitializer {
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sqlScript)) {
             preparedStatement.executeUpdate();
-            logger.info("Executed SQL script: " + sqlScript);
+            LOGGER.info("Executed SQL script: " + sqlScript);
         } catch (SQLException e) {
-            String message = "Error executing SQL script ";
-            logger.log(Level.SEVERE, message + sqlScript, e);
-            throw new DatabaseInitializerException(message + sqlScript, e);
+            handleSQLException(e, "Error executing SQL script", sqlScript);
         }
     }
 
@@ -62,5 +42,19 @@ public class DatabaseInitializer {
             bufferedReader.lines().forEach(result::append);
             return result.toString();
         });
+    }
+
+    private void handleSQLException(SQLException e, String message, String sql) {
+        String fullMessage = String.format("%s\nSQL: %s", message, sql);
+        throwException(e, fullMessage);
+    }
+
+    private void handleSQLException(SQLException e, String message) {
+        throwException(e, message);
+    }
+
+    private void throwException(SQLException e, String message) {
+        LOGGER.log(Level.SEVERE, message, e);
+        throw new DatabaseInitializerException(message, e);
     }
 }

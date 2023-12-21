@@ -1,6 +1,6 @@
-package dev.alexcoss.resourceUtils;
+package dev.alexcoss.util;
 
-import dev.alexcoss.resourceUtils.exceptions.FileReadException;
+import dev.alexcoss.util.exceptions.FileReadException;
 
 import java.io.*;
 import java.nio.file.Files;

@@ -1,6 +1,6 @@
-package dev.alexcoss.resourceUtils;
+package dev.alexcoss.util;
 
-import dev.alexcoss.resourceUtils.exceptions.JdbcPropertiesReaderException;
+import dev.alexcoss.util.exceptions.JdbcPropertiesReaderException;
 
 import java.io.IOException;
 import java.io.InputStream;

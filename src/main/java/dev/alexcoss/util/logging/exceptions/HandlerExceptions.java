@@ -1,4 +1,4 @@
-package dev.alexcoss.logging.exceptions;
+package dev.alexcoss.util.logging.exceptions;
 
 public class HandlerExceptions extends RuntimeException{
     public HandlerExceptions(String message) {

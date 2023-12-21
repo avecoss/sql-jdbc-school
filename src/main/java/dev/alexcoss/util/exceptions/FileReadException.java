@@ -1,4 +1,4 @@
-package dev.alexcoss.resourceUtils.exceptions;
+package dev.alexcoss.util.exceptions;
 
 public class FileReadException extends RuntimeException {
 
