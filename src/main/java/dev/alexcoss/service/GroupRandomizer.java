@@ -5,7 +5,7 @@ import dev.alexcoss.model.Student;
 
 import java.util.*;
 
-public class GroupRandomizer {
+public class GroupRandomizer extends Randomizer {
 
     private static final int MIN_STUDENTS_IN_GROUP = 10;
     private static final int MAX_STUDENTS_IN_GROUP = 30;
@@ -23,7 +23,7 @@ public class GroupRandomizer {
 
     private void distributeStudentsToGroups(List<Student> students, List<Group> groups, List<Student> studentsInGroups) {
         for (Group group : groups) {
-            int groupSize = getRandomGroupSize();
+            int groupSize = getRandomInteger(MAX_STUDENTS_IN_GROUP, MIN_STUDENTS_IN_GROUP);
             addStudentsToGroup(students, studentsInGroups, groupSize, group.getId());
         }
     }
@@ -33,17 +33,6 @@ public class GroupRandomizer {
             Student student = students.remove(0);
             student.setGroupId(groupId);
             studentsInGroups.add(student);
-        }
-    }
-
-    private int getRandomGroupSize() {
-        int bound = MAX_STUDENTS_IN_GROUP - MIN_STUDENTS_IN_GROUP + 1;
-        return new Random().nextInt(bound) + MIN_STUDENTS_IN_GROUP;
-    }
-
-    private void shuffleCollections(List<?>... collections) {
-        for (List<?> collection : collections) {
-            Collections.shuffle(collection);
         }
     }
 }

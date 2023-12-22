@@ -1,41 +1,30 @@
 package dev.alexcoss.dao;
 
-import dev.alexcoss.dao.exceptions.StudentDaoException;
 import dev.alexcoss.model.Student;
-import dev.alexcoss.util.logging.FileHandlerInitializer;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-public class StudentDao {
+public class StudentDao extends AbstractDao<Student, List<Student>> {
 
     private static final String INSERT_SQL = "INSERT INTO students (group_id, first_name, last_name) VALUES (?, ?, ?)";
     private static final String UPDATE_SQL = "UPDATE students SET group_id = ?, first_name = ?, last_name = ? WHERE student_id = ?";
     private static final String SELECT_BY_ID_SQL = "SELECT * FROM students WHERE student_id = ?";
     private static final String SELECT_ALL_SQL = "SELECT * FROM students";
+    private static final String DELETE_SQL = "DELETE FROM students WHERE student_id = ?";
+    private static final String EXISTS_SQL = " AND EXISTS (SELECT 1 FROM students WHERE student_id = ?)";
 
-    private static final Logger LOGGER = Logger.getLogger(DatabaseInitializer.class.getName());
-
-    static {
-        FileHandlerInitializer.initializeFileHandler(LOGGER, "student_dao");
+    public StudentDao() {
+        super(StudentDao.class.getName());
     }
 
-    private final ConnectionFactory connectionFactory = new PostgreSqlConnectionFactory();
-
-    public void addStudent(Student student) {
+    @Override
+    public void addItem(Student student) {
         try (Connection connection = connectionFactory.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SQL)) {
 
-            preparedStatement.setInt(1, student.getGroupId());
-            preparedStatement.setString(2, student.getFirstName());
-            preparedStatement.setString(3, student.getLastName());
+            setStudentValuesToStatement(student, preparedStatement);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             handleSQLException(e, "Error adding student to database", INSERT_SQL, student);
@@ -44,12 +33,11 @@ public class StudentDao {
 
     public void updateStudent(Student student) {
         try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_SQL + EXISTS_SQL)) {
 
-            preparedStatement.setInt(1, student.getGroupId());
-            preparedStatement.setString(2, student.getFirstName());
-            preparedStatement.setString(3, student.getLastName());
+            setStudentValuesToStatement(student, preparedStatement);
             preparedStatement.setInt(4, student.getId());
+
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             handleSQLException(e, "Error updating student to database", UPDATE_SQL, student);
@@ -58,14 +46,15 @@ public class StudentDao {
 
     public Student getStudentById(int studentId) {
         try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BY_ID_SQL)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BY_ID_SQL + EXISTS_SQL)) {
 
             preparedStatement.setInt(1, studentId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    return getStudent(resultSet);
+                    return resultSetToObject(resultSet);
                 }
             }
+
         } catch (SQLException e) {
             handleSQLException(e, "Error getting student by id from database", SELECT_BY_ID_SQL, studentId);
         }
@@ -73,7 +62,19 @@ public class StudentDao {
         return null;
     }
 
-    public List<Student> getAllStudents() {
+    public void removeStudentById(int studentId) {
+        try (Connection connection = connectionFactory.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_SQL + EXISTS_SQL)) {
+
+            preparedStatement.setInt(1, studentId);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            handleSQLException(e, "Error removing student from database", DELETE_SQL, studentId);
+        }
+    }
+
+    @Override
+    public List<Student> getAllItems() {
         List<Student> students = new ArrayList<>();
 
         try (Connection connection = connectionFactory.getConnection();
@@ -81,7 +82,7 @@ public class StudentDao {
              ResultSet resultSet = preparedStatement.executeQuery()) {
 
             while (resultSet.next()) {
-                Student student = getStudent(resultSet);
+                Student student = resultSetToObject(resultSet);
                 students.add(student);
             }
         } catch (SQLException e) {
@@ -91,14 +92,14 @@ public class StudentDao {
         return students;
     }
 
-    public void addStudents(List<Student> studentList) {
+    @Override
+    public void addAllItems(List<Student> studentList) {
         try (Connection connection = connectionFactory.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SQL)) {
 
             for (Student student : studentList) {
-                preparedStatement.setInt(1, student.getGroupId());
-                preparedStatement.setString(2, student.getFirstName());
-                preparedStatement.setString(3, student.getLastName());
+
+                setStudentValuesToStatement(student, preparedStatement);
                 preparedStatement.addBatch();
             }
 
@@ -108,21 +109,27 @@ public class StudentDao {
         }
     }
 
-    private Student getStudent(ResultSet resultSet) throws SQLException {
+    @Override
+    protected Student resultSetToObject(ResultSet resultSet) throws SQLException {
         Student student = new Student();
 
         student.setId(resultSet.getInt("student_id"));
-        student.setGroupId(resultSet.getInt("group_id"));
         student.setFirstName(resultSet.getString("first_name"));
         student.setLastName(resultSet.getString("last_name"));
+        student.setGroupId(resultSet.getObject("group_id", Integer.class));
 
         return student;
     }
 
-    private void handleSQLException(SQLException e, String message, String sql, Object... params) {
-        String fullMessage = String.format("%s\nSQL: %s\nParameters: %s", message, sql, Arrays.toString(params));
-        LOGGER.log(Level.SEVERE, fullMessage, e);
-        throw new StudentDaoException(fullMessage, e);
+    private void setStudentValuesToStatement(Student student, PreparedStatement preparedStatement) throws SQLException {
+        Integer groupId = null;
+        if (!student.getDefaultInteger().equals(student.getGroupId())) {
+            groupId = student.getGroupId();
+        }
+
+        preparedStatement.setObject(1, groupId, Types.INTEGER);
+        preparedStatement.setString(2, student.getFirstName());
+        preparedStatement.setString(3, student.getLastName());
     }
 }
 

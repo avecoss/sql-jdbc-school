@@ -1,8 +1,6 @@
 package dev.alexcoss.dao;
 
-import dev.alexcoss.dao.exceptions.DatabaseInitializerException;
 import dev.alexcoss.dao.exceptions.DatabaseRemoverException;
-import dev.alexcoss.dao.exceptions.StudentDaoException;
 import dev.alexcoss.util.logging.FileHandlerInitializer;
 
 import java.sql.*;

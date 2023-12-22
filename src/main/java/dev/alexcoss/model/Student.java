@@ -1,13 +1,17 @@
 package dev.alexcoss.model;
 
+import java.util.Objects;
+
 public class Student {
+
+    private final Integer defaultInteger = -1;
 
     private int id;
     private String firstName;
     private String lastName;
-    private int groupId;
+    private Integer groupId = defaultInteger;
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -19,7 +23,7 @@ public class Student {
         return lastName;
     }
 
-    public int getGroupId() {
+    public Integer getGroupId() {
         return groupId;
     }
 
@@ -35,12 +39,16 @@ public class Student {
         this.lastName = lastName;
     }
 
-    public void setGroupId(int groupId) {
-        this.groupId = groupId;
+    public void setGroupId(Integer groupId) {
+        this.groupId = Objects.requireNonNullElse(groupId, defaultInteger);
+    }
+
+    public Integer getDefaultInteger() {
+        return defaultInteger;
     }
 
     @Override
     public String toString() {
-        return String.format("%s %s groupId:%d", firstName, lastName, groupId);
+        return String.format("\n%d %s %s groupId:%d", id, firstName, lastName, groupId);
     }
 }

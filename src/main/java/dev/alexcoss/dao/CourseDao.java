@@ -1,30 +1,38 @@
 package dev.alexcoss.dao;
 
-import dev.alexcoss.dao.exceptions.CourseDaoException;
 import dev.alexcoss.model.Course;
-import dev.alexcoss.util.logging.FileHandlerInitializer;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-public class CourseDao {
+public class CourseDao extends AbstractDao<Course, List<Course>>{
 
     private static final String INSERT_SQL = "INSERT INTO courses (course_name, course_description) VALUES (?, ?)";
+    private static final String SELECT_ALL_SQL = "SELECT * FROM courses";
 
-    private static final Logger LOGGER = Logger.getLogger(DatabaseInitializer.class.getName());
-
-    static {
-        FileHandlerInitializer.initializeFileHandler(LOGGER, "course_dao");
+    public CourseDao() {
+        super(CourseDao.class.getName());
     }
 
-    private final ConnectionFactory connectionFactory = new PostgreSqlConnectionFactory();
+    @Override
+    public void addItem(Course course) {
+        try (Connection connection = connectionFactory.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SQL)) {
 
-    public void addGroups(List<Course> courseList) {
+            preparedStatement.setString(1, course.getName());
+            preparedStatement.setString(2, course.getDescription());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            handleSQLException(e, "Error adding course to database", INSERT_SQL, course);
+        }
+    }
+
+    @Override
+    public void addAllItems(List<Course> courseList) {
         try (Connection connection = connectionFactory.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SQL)) {
 
@@ -40,9 +48,33 @@ public class CourseDao {
         }
     }
 
-    private void handleSQLException(SQLException e, String message, String sql, Object... params) {
-        String fullMessage = String.format("%s\nSQL: %s\nParameters: %s", message, sql, Arrays.toString(params));
-        LOGGER.log(Level.SEVERE, fullMessage, e);
-        throw new CourseDaoException(fullMessage, e);
+    @Override
+    public List<Course> getAllItems() {
+        List<Course> courses = new ArrayList<>();
+
+        try (Connection connection = connectionFactory.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_SQL);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
+
+            while (resultSet.next()) {
+                Course course = resultSetToObject(resultSet);
+                courses.add(course);
+            }
+        } catch (SQLException e) {
+            handleSQLException(e, "Error getting courses from database", SELECT_ALL_SQL);
+        }
+
+        return courses;
+    }
+
+    @Override
+    protected Course resultSetToObject(ResultSet resultSet) throws SQLException {
+        Course course = new Course();
+
+        course.setId(resultSet.getInt("course_id"));
+        course.setName(resultSet.getString("course_name"));
+        course.setDescription(resultSet.getString("course_description"));
+
+        return course;
     }
 }

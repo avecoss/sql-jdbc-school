@@ -1,31 +1,35 @@
 package dev.alexcoss.dao;
 
-import dev.alexcoss.dao.exceptions.GroupDaoException;
 import dev.alexcoss.model.Group;
 import dev.alexcoss.model.Student;
-import dev.alexcoss.util.logging.FileHandlerInitializer;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-public class GroupDao {
+public class GroupDao extends AbstractDao<Group, List<Group>> {
 
     private static final String INSERT_SQL = "INSERT INTO groups (group_name) VALUES (?)";
     private static final String SELECT_ALL_SQL = "SELECT * FROM groups";
 
-    private static final Logger LOGGER = Logger.getLogger(DatabaseInitializer.class.getName());
-
-    static {
-        FileHandlerInitializer.initializeFileHandler(LOGGER, "group_dao");
+    public GroupDao() {
+        super(GroupDao.class.getName());
     }
 
-    private final ConnectionFactory connectionFactory = new PostgreSqlConnectionFactory();
+    @Override
+    public void addItem(Group group) {
+        try (Connection connection = connectionFactory.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SQL)) {
 
-    public void addGroups(List<Group> groupList) {
+            preparedStatement.setString(1, group.getName());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            handleSQLException(e, "Error adding group to database", INSERT_SQL, group);
+        }
+    }
+
+    @Override
+    public void addAllItems(List<Group> groupList) {
         try (Connection connection = connectionFactory.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SQL)) {
 
@@ -40,7 +44,8 @@ public class GroupDao {
         }
     }
 
-    public List<Group> getAllGroups() {
+    @Override
+    public List<Group> getAllItems() {
         List<Group> groups = new ArrayList<>();
 
         try (Connection connection = connectionFactory.getConnection();
@@ -48,7 +53,7 @@ public class GroupDao {
              ResultSet resultSet = preparedStatement.executeQuery()) {
 
             while (resultSet.next()) {
-                Group group = getGroup(resultSet);
+                Group group = resultSetToObject(resultSet);
                 groups.add(group);
             }
         } catch (SQLException e) {
@@ -58,18 +63,13 @@ public class GroupDao {
         return groups;
     }
 
-    private Group getGroup(ResultSet resultSet) throws SQLException {
+    @Override
+    protected Group resultSetToObject(ResultSet resultSet) throws SQLException {
         Group group = new Group();
 
         group.setId(resultSet.getInt("group_id"));
         group.setName(resultSet.getString("group_name"));
 
         return group;
-    }
-
-    private void handleSQLException(SQLException e, String message, String sql, Object... params) {
-        String fullMessage = String.format("%s\nSQL: %s\nParameters: %s", message, sql, Arrays.toString(params));
-        LOGGER.log(Level.SEVERE, fullMessage, e);
-        throw new GroupDaoException(fullMessage, e);
     }
 }

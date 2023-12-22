@@ -3,13 +3,38 @@ package dev.alexcoss.service;
 import dev.alexcoss.dao.CourseDao;
 import dev.alexcoss.dao.GroupDao;
 import dev.alexcoss.dao.StudentDao;
+import dev.alexcoss.dao.StudentsCoursesDao;
 import dev.alexcoss.model.Course;
 import dev.alexcoss.model.Group;
 import dev.alexcoss.model.Student;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class GenerateStartData {
+
+    private final GroupDao groupDao;
+    private final StudentDao studentDao;
+    private final CourseDao courseDao;
+    private final GroupsGenerator groupsGenerator;
+    private final StudentGenerator studentGenerator;
+    private final CoursesGenerator coursesGenerator;
+    private final GroupRandomizer groupRandomizer;
+    private final CourseRandomizer courseRandomizer;
+    private final StudentsCoursesDao studentsCoursesDao;
+
+    public GenerateStartData() {
+        this.groupDao = new GroupDao();
+        this.studentDao = new StudentDao();
+        this.courseDao = new CourseDao();
+        this.groupsGenerator = new GroupsGenerator();
+        this.studentGenerator = new StudentGenerator();
+        this.coursesGenerator = new CoursesGenerator();
+        this.groupRandomizer = new GroupRandomizer();
+        this.courseRandomizer = new CourseRandomizer();
+        this.studentsCoursesDao = new StudentsCoursesDao();
+    }
 
     public void generateDataForDatabase() {
         List<Group> groups = generateGroups();
@@ -19,48 +44,61 @@ public class GenerateStartData {
         saveCoursesToDatabase(courses);
 
         List<Student> students = generateStudents();
-        List<Group> groupWithId = getGroupsFromDatabase();
-        List<Student> studentsInGroups = assignStudentsToGroups(students, groupWithId);
+        List<Group> groupsFromDatabase = getGroupsFromDatabase();
+        List<Student> studentsInGroups = assignStudentsToGroups(students, groupsFromDatabase);
         saveStudentsToDatabase(studentsInGroups);
+
+        List<Student> studentsFromDatabase = getStudentsFromDatabase();
+        List<Course> coursesFromDatabase = getCoursesFromDatabase();
+        Map<Integer, Set<Integer>> mapStudentCourses = assignStudentsToCourse(studentsFromDatabase, coursesFromDatabase);
+        saveCoursesToDatabase(mapStudentCourses);
     }
 
     private List<Group> generateGroups() {
-        GroupsGenerator groupsGenerator = new GroupsGenerator();
         return groupsGenerator.generateGroupList();
     }
 
     private void saveGroupsToDatabase(List<Group> groups) {
-        GroupDao groupDao = new GroupDao();
-        groupDao.addGroups(groups);
+        groupDao.addAllItems(groups);
     }
 
     private List<Student> generateStudents() {
-        StudentGenerator studentGenerator = new StudentGenerator();
         return studentGenerator.generateStudents();
     }
 
     private List<Group> getGroupsFromDatabase() {
-        GroupDao groupDao = new GroupDao();
-        return groupDao.getAllGroups();
+        return groupDao.getAllItems();
     }
 
     private List<Student> assignStudentsToGroups(List<Student> students, List<Group> groups) {
-        GroupRandomizer randomizer = new GroupRandomizer();
-        return randomizer.assignStudentsToGroups(students, groups);
+        return groupRandomizer.assignStudentsToGroups(students, groups);
     }
 
     private void saveStudentsToDatabase(List<Student> students) {
-        StudentDao studentDao = new StudentDao();
-        studentDao.addStudents(students);
+        studentDao.addAllItems(students);
     }
 
     private List<Course> generateCourses() {
-        CoursesGenerator coursesGenerator = new CoursesGenerator();
         return coursesGenerator.getCoursesList();
     }
 
     private void saveCoursesToDatabase(List<Course> courses) {
-        CourseDao courseDao = new CourseDao();
-        courseDao.addGroups(courses);
+        courseDao.addAllItems(courses);
+    }
+
+    private List<Student> getStudentsFromDatabase() {
+        return studentDao.getAllItems();
+    }
+
+    private List<Course> getCoursesFromDatabase() {
+        return courseDao.getAllItems();
+    }
+
+    private Map<Integer, Set<Integer>> assignStudentsToCourse(List<Student> students, List<Course> courses) {
+        return courseRandomizer.assignStudentsToCourse(students, courses);
+    }
+
+    private void saveCoursesToDatabase(Map<Integer, Set<Integer>> mapStudentCourses) {
+        studentsCoursesDao.addAllItems(mapStudentCourses);
     }
 }
