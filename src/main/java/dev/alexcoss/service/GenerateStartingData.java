@@ -1,16 +1,8 @@
 package dev.alexcoss.service;
 
 import dev.alexcoss.dao.*;
-import dev.alexcoss.model.Course;
-import dev.alexcoss.model.Group;
-import dev.alexcoss.model.Student;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class GenerateStartingData {
-
     private final GroupDao groupDao;
     private final StudentDao studentDao;
     private final CourseDao courseDao;
@@ -34,68 +26,16 @@ public class GenerateStartingData {
     }
 
     public void generateDataForDatabase() {
-        List<Group> groups = generateGroups();
-        saveGroupsToDatabase(groups);
+        GroupManager groupManager = new GroupManager(groupDao, groupsGenerator);
+        groupManager.generateAndSaveGroupsToDatabase();
 
-        List<Course> courses = generateCourses();
-        saveCoursesToDatabase(courses);
+        CourseManager courseManager = new CourseManager(courseDao, coursesGenerator);
+        courseManager.generateAndSaveCoursesToDatabase();
 
-        List<Student> students = generateStudents();
-        List<Group> groupsFromDatabase = getGroupsFromDatabase();
-        List<Student> studentsInGroups = assignStudentsToGroups(students, groupsFromDatabase);
-        saveStudentsToDatabase(studentsInGroups);
+        StudentManager studentManager = new StudentManager(studentDao, groupRandomizer, studentGenerator, groupDao);
+        studentManager.generateAndSaveStudentsToDatabase();
 
-        List<Student> studentsFromDatabase = getStudentsFromDatabase();
-        List<Course> coursesFromDatabase = getCoursesFromDatabase();
-        Map<Integer, Set<Integer>> mapStudentCourses = assignStudentsToCourse(studentsFromDatabase, coursesFromDatabase);
-        saveCoursesToDatabase(mapStudentCourses);
-    }
-
-    private List<Group> generateGroups() {
-        return groupsGenerator.generateGroupList();
-    }
-
-    private void saveGroupsToDatabase(List<Group> groups) {
-        groupDao.addAllItems(groups);
-    }
-
-    private List<Student> generateStudents() {
-        return studentGenerator.generateStudents();
-    }
-
-    private List<Group> getGroupsFromDatabase() {
-        return groupDao.getAllItems();
-    }
-
-    private List<Student> assignStudentsToGroups(List<Student> students, List<Group> groups) {
-        return groupRandomizer.assignStudentsToGroups(students, groups);
-    }
-
-    private void saveStudentsToDatabase(List<Student> students) {
-        studentDao.addAllItems(students);
-    }
-
-    private List<Course> generateCourses() {
-        return coursesGenerator.getCoursesList();
-    }
-
-    private void saveCoursesToDatabase(List<Course> courses) {
-        courseDao.addAllItems(courses);
-    }
-
-    private List<Student> getStudentsFromDatabase() {
-        return studentDao.getAllItems();
-    }
-
-    private List<Course> getCoursesFromDatabase() {
-        return courseDao.getAllItems();
-    }
-
-    private Map<Integer, Set<Integer>> assignStudentsToCourse(List<Student> students, List<Course> courses) {
-        return courseRandomizer.assignStudentsToCourse(students, courses);
-    }
-
-    private void saveCoursesToDatabase(Map<Integer, Set<Integer>> mapStudentCourses) {
-        studentsCoursesDao.addAllItems(mapStudentCourses);
+        StudentsCoursesManager studentsCoursesManager = new StudentsCoursesManager(courseRandomizer, studentsCoursesDao, studentDao, courseDao);
+        studentsCoursesManager.assignStudentsToCoursesAndSave();
     }
 }
