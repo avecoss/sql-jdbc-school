@@ -1,24 +1,23 @@
 package dev.alexcoss.dao;
 
-import dev.alexcoss.dao.exceptions.DatabaseRemoverException;
+import dev.alexcoss.dao.exceptions.DaoException;
+import dev.alexcoss.dao.exceptions.DatabaseManagerException;
 import dev.alexcoss.util.logging.FileHandlerInitializer;
 
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DatabaseTableRemover {
+public class DatabaseRemover extends DatabaseManager implements Remover{
 
     private static final String DROP_TABLE_SQL = "DROP TABLE %s CASCADE";
 
-    private static final Logger LOGGER = Logger.getLogger(DatabaseTableRemover.class.getName());
-
-    static {
-        FileHandlerInitializer.initializeFileHandler(LOGGER, "database_remover");
+    public DatabaseRemover() {
+        super(DatabaseRemover.class.getName());
     }
 
-    public DatabaseTableRemover() {
-        ConnectionFactory connectionFactory = new PostgreSqlConnectionFactory();
+    @Override
+    public void removeDatabase() {
         try (Connection connection = connectionFactory.getConnection()) {
             dropAllTables(connection);
         } catch (SQLException e) {
@@ -32,28 +31,26 @@ public class DatabaseTableRemover {
 
             while (resultSet.next()) {
                 String tableName = resultSet.getString("TABLE_NAME");
-                statement.executeUpdate(String.format(DROP_TABLE_SQL, tableName));
-                LOGGER.info("Dropped table: " + tableName);
+                dropTable(statement, tableName);
             }
         } catch (SQLException e) {
             handleSQLException(e, "Error dropping tables");
         }
     }
 
+    private void dropTable(Statement statement, String tableName) throws SQLException {
+        statement.executeUpdate(String.format(DROP_TABLE_SQL, tableName));
+        logger.info("Dropped table: " + tableName);
+    }
+
     private ResultSet getAllTableNames(Connection connection) {
         try {
             DatabaseMetaData metaData = connection.getMetaData();
             ResultSet resultSet = metaData.getTables(null, null, "%", new String[]{"TABLE"});
-            LOGGER.info("Retrieved table names");
+            logger.info("Retrieved table names");
             return resultSet;
         } catch (SQLException e) {
-            handleSQLException(e, "Error fetching table names");
-            throw new DatabaseRemoverException("Error fetching table names");
+            throw new DatabaseManagerException("Error fetching table names", e);
         }
-    }
-
-    private void handleSQLException(SQLException e, String message) {
-        LOGGER.log(Level.SEVERE, message, e);
-        throw new DatabaseRemoverException(message, e);
     }
 }

@@ -1,9 +1,6 @@
 package dev.alexcoss.service;
 
-import dev.alexcoss.dao.CourseDao;
-import dev.alexcoss.dao.GroupDao;
-import dev.alexcoss.dao.StudentDao;
-import dev.alexcoss.dao.StudentsCoursesDao;
+import dev.alexcoss.dao.*;
 import dev.alexcoss.model.Course;
 import dev.alexcoss.model.Group;
 import dev.alexcoss.model.Student;
@@ -12,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class GenerateStartData {
+public class GenerateStartingData {
 
     private final GroupDao groupDao;
     private final StudentDao studentDao;
@@ -24,7 +21,7 @@ public class GenerateStartData {
     private final CourseRandomizer courseRandomizer;
     private final StudentsCoursesDao studentsCoursesDao;
 
-    public GenerateStartData() {
+    public GenerateStartingData() {
         this.groupDao = new GroupDao();
         this.studentDao = new StudentDao();
         this.courseDao = new CourseDao();

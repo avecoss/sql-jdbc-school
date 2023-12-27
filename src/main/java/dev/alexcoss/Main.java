@@ -1,15 +1,17 @@
 package dev.alexcoss;
 
-import dev.alexcoss.dao.DatabaseManager;
-import dev.alexcoss.service.GenerateStartData;
+import dev.alexcoss.dao.*;
+import dev.alexcoss.service.GenerateStartingData;
 
 public class Main {
     public static void main(String[] args) {
-        DatabaseManager manager = new DatabaseManager();
-        manager.removeDatabaseTables();
-        manager.initializeDatabase();
+        Remover removerManager = new DatabaseRemover();
+        removerManager.removeDatabase();
 
-        GenerateStartData generateStartData = new GenerateStartData();
-        generateStartData.generateDataForDatabase();
+        Initializer initializerManager = new DatabaseInitializer();
+        initializerManager.initializeDatabase();
+
+        GenerateStartingData generateStartingData = new GenerateStartingData();
+        generateStartingData.generateDataForDatabase();
     }
 }
