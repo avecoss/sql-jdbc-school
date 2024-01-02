@@ -1,18 +1,15 @@
 package dev.alexcoss.dao;
 
-import dev.alexcoss.dao.exceptions.DatabaseManagerException;
-import dev.alexcoss.util.logging.FileHandlerInitializer;
 import dev.alexcoss.util.FileReader;
 
 import java.sql.*;
-import java.util.logging.*;
 
-public class DatabaseInitializer extends DatabaseManager implements Initializer {
+public class DatabaseInitializer extends AbstractDatabaseManager implements Initializer {
 
     private static final String SQL_PATH_CREATE_TABLES = "src/main/resources/sql/create_tables.sql";
 
-    public DatabaseInitializer() {
-        super(DatabaseInitializer.class.getName());
+    public DatabaseInitializer(ConnectionFactory connectionFactory) {
+        super(DatabaseInitializer.class.getName(), connectionFactory);
     }
 
     @Override

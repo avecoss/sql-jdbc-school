@@ -1,4 +1,3 @@
-/*create tables*/
 CREATE TABLE IF NOT EXISTS groups
 (
     group_id   SERIAL PRIMARY KEY,
@@ -22,7 +21,7 @@ CREATE TABLE IF NOT EXISTS courses
 
 CREATE TABLE IF NOT EXISTS students_courses
 (
-    student_id INT REFERENCES students (student_id) ON DELETE SET NULL,
-    course_id  INT REFERENCES courses (course_id) ON DELETE SET NULL,
+    student_id INT REFERENCES students (student_id) ON DELETE CASCADE ,
+    course_id  INT REFERENCES courses (course_id) ON DELETE CASCADE ,
     PRIMARY KEY (student_id, course_id)
 );

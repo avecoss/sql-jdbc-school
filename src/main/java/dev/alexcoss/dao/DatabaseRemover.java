@@ -1,19 +1,15 @@
 package dev.alexcoss.dao;
 
-import dev.alexcoss.dao.exceptions.DaoException;
 import dev.alexcoss.dao.exceptions.DatabaseManagerException;
-import dev.alexcoss.util.logging.FileHandlerInitializer;
 
 import java.sql.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-public class DatabaseRemover extends DatabaseManager implements Remover{
+public class DatabaseRemover extends AbstractDatabaseManager implements Remover {
 
     private static final String DROP_TABLE_SQL = "DROP TABLE %s CASCADE";
 
-    public DatabaseRemover() {
-        super(DatabaseRemover.class.getName());
+    public DatabaseRemover(ConnectionFactory connectionFactory) {
+        super(DatabaseRemover.class.getName(), connectionFactory);
     }
 
     @Override

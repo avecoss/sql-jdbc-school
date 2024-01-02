@@ -1,6 +1,7 @@
 package dev.alexcoss.dao;
 
 import dev.alexcoss.model.Course;
+import dev.alexcoss.model.Student;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,13 +10,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CourseDao extends AbstractDao<Course, List<Course>>{
+public class CourseDao extends AbstractDao<Course, List<Course>> {
 
     private static final String INSERT_SQL = "INSERT INTO courses (course_name, course_description) VALUES (?, ?)";
     private static final String SELECT_ALL_SQL = "SELECT * FROM courses";
 
-    public CourseDao() {
-        super(CourseDao.class.getName());
+    public CourseDao(ConnectionFactory connectionFactory) {
+        super(CourseDao.class.getName(), connectionFactory);
     }
 
     @Override

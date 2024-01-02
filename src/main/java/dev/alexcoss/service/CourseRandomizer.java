@@ -31,8 +31,15 @@ public class CourseRandomizer extends Randomizer {
         quantity = Math.min(quantity, max);
 
         while (studentCourses.size() < quantity) {
-            studentCourses.add(getRandomInteger(max, 1));
+            studentCourses.add(getRandomInteger(max, getMinCourseId(courses)));
         }
         return studentCourses;
+    }
+
+    private int getMinCourseId(List<Course> courses) {
+        return courses.stream()
+            .mapToInt(Course::getId)
+            .min()
+            .orElseThrow(NoSuchElementException::new);
     }
 }

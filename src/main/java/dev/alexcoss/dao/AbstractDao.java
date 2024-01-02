@@ -1,22 +1,16 @@
 package dev.alexcoss.dao;
 
 import dev.alexcoss.dao.exceptions.DaoException;
-import dev.alexcoss.util.logging.FileHandlerInitializer;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
-public abstract class AbstractDao<T, E> implements Dao<T, E> {
-    protected final ConnectionFactory connectionFactory;
-    protected final Logger logger;
+public abstract class AbstractDao<T, E> extends AbstractDatabaseManager implements Dao<T, E> {
 
-    public AbstractDao(String loggerName) {
-        this.connectionFactory = new PostgreSqlConnectionFactory();
-        this.logger = Logger.getLogger(loggerName);
-        FileHandlerInitializer.initializeFileHandler(logger, loggerName);
+    public AbstractDao(String loggerName, ConnectionFactory connectionFactory) {
+        super(loggerName, connectionFactory);
     }
 
     protected abstract T resultSetToObject(ResultSet resultSet) throws SQLException;

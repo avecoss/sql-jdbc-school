@@ -13,10 +13,14 @@ public class StudentDao extends AbstractDao<Student, List<Student>> {
     private static final String SELECT_BY_ID_SQL = "SELECT * FROM students WHERE student_id = ?";
     private static final String SELECT_ALL_SQL = "SELECT * FROM students";
     private static final String DELETE_SQL = "DELETE FROM students WHERE student_id = ?";
-    private static final String EXISTS_SQL = " AND EXISTS (SELECT 1 FROM students WHERE student_id = ?)";
+    private static final String SELECT_STUDENTS_IN_COURSE_SQL = "SELECT s.student_id, s.group_id, s.first_name, s.last_name\n" +
+        "FROM courses as c\n" +
+        "         JOIN students_courses as sc ON c.course_id = sc.course_id\n" +
+        "         JOIN students as s ON sc.student_id = s.student_id\n" +
+        "WHERE c.course_name = ?";
 
-    public StudentDao() {
-        super(StudentDao.class.getName());
+    public StudentDao(ConnectionFactory connectionFactory) {
+        super(StudentDao.class.getName(), connectionFactory);
     }
 
     @Override
@@ -33,7 +37,7 @@ public class StudentDao extends AbstractDao<Student, List<Student>> {
 
     public void updateStudent(Student student) {
         try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_SQL + EXISTS_SQL)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
 
             setStudentValuesToStatement(student, preparedStatement);
             preparedStatement.setInt(4, student.getId());
@@ -46,9 +50,10 @@ public class StudentDao extends AbstractDao<Student, List<Student>> {
 
     public Student getStudentById(int studentId) {
         try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BY_ID_SQL + EXISTS_SQL)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BY_ID_SQL)) {
 
             preparedStatement.setInt(1, studentId);
+
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     return resultSetToObject(resultSet);
@@ -58,13 +63,12 @@ public class StudentDao extends AbstractDao<Student, List<Student>> {
         } catch (SQLException e) {
             handleSQLException(e, "Error getting student by id from database", SELECT_BY_ID_SQL, studentId);
         }
-
         return null;
     }
 
     public void removeStudentById(int studentId) {
         try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_SQL + EXISTS_SQL)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_SQL)) {
 
             preparedStatement.setInt(1, studentId);
             preparedStatement.executeUpdate();
@@ -88,7 +92,6 @@ public class StudentDao extends AbstractDao<Student, List<Student>> {
         } catch (SQLException e) {
             handleSQLException(e, "Error getting students from database", SELECT_ALL_SQL);
         }
-
         return students;
     }
 
@@ -107,6 +110,25 @@ public class StudentDao extends AbstractDao<Student, List<Student>> {
         } catch (SQLException e) {
             handleSQLException(e, "Error adding students to database", INSERT_SQL, studentList);
         }
+    }
+
+    public List<Student> getStudentsByCourse(String courseName) {
+        List<Student> students = new ArrayList<>();
+
+        try (Connection connection = connectionFactory.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_STUDENTS_IN_COURSE_SQL)) {
+            preparedStatement.setString(1, courseName);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    students.add(resultSetToObject(resultSet));
+                }
+            }
+        } catch (SQLException e) {
+            handleSQLException(e, "Error getting students by course from database", SELECT_STUDENTS_IN_COURSE_SQL);
+        }
+
+        return students;
     }
 
     @Override

@@ -7,22 +7,22 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public abstract class DatabaseManager {
+public abstract class AbstractDatabaseManager {
 
-    protected final ConnectionFactory connectionFactory;
-    protected final Logger logger;
+    final ConnectionFactory connectionFactory;
+    final Logger logger;
 
-    public DatabaseManager(String loggerName) {
-        this.connectionFactory = new PostgreSqlConnectionFactory();
+    public AbstractDatabaseManager(String loggerName, ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
         this.logger = initializeLogger(loggerName);
     }
 
-    protected void handleSQLException(SQLException e, String message) {
+    void handleSQLException(SQLException e, String message) {
         logSQLException(Level.SEVERE, e, message, null);
         throw new DatabaseManagerException(buildFullMessage(message, null), e);
     }
 
-    protected void handleSQLException(SQLException e, String message, String sql) {
+    void handleSQLException(SQLException e, String message, String sql) {
         logSQLException(Level.SEVERE, e, message, sql);
         throw new DatabaseManagerException(buildFullMessage(message, sql), e);
     }

@@ -13,16 +13,16 @@ public class GenerateStartingData {
     private final CourseRandomizer courseRandomizer;
     private final StudentsCoursesDao studentsCoursesDao;
 
-    public GenerateStartingData() {
-        this.groupDao = new GroupDao();
-        this.studentDao = new StudentDao();
-        this.courseDao = new CourseDao();
+    public GenerateStartingData(ConnectionFactory connectionFactory) {
+        this.groupDao = new GroupDao(connectionFactory);
+        this.studentDao = new StudentDao(connectionFactory);
+        this.courseDao = new CourseDao(connectionFactory);
         this.groupsGenerator = new GroupsGenerator();
         this.studentGenerator = new StudentGenerator();
         this.coursesGenerator = new CoursesGenerator();
         this.groupRandomizer = new GroupRandomizer();
         this.courseRandomizer = new CourseRandomizer();
-        this.studentsCoursesDao = new StudentsCoursesDao();
+        this.studentsCoursesDao = new StudentsCoursesDao(connectionFactory);
     }
 
     public void generateDataForDatabase() {
@@ -37,5 +37,21 @@ public class GenerateStartingData {
 
         StudentsCoursesManager studentsCoursesManager = new StudentsCoursesManager(courseRandomizer, studentsCoursesDao, studentDao, courseDao);
         studentsCoursesManager.assignStudentsToCoursesAndSave();
+    }
+
+    public GroupDao getGroupDao() {
+        return groupDao;
+    }
+
+    public StudentDao getStudentDao() {
+        return studentDao;
+    }
+
+    public CourseDao getCourseDao() {
+        return courseDao;
+    }
+
+    public StudentsCoursesDao getStudentsCoursesDao() {
+        return studentsCoursesDao;
     }
 }

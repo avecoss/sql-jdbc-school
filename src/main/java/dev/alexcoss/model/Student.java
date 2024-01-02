@@ -51,4 +51,17 @@ public class Student {
     public String toString() {
         return String.format("\n%d %s %s groupId:%d", id, firstName, lastName, groupId);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Student student = (Student) o;
+        return id == student.id && Objects.equals(firstName, student.firstName) && Objects.equals(lastName, student.lastName) && Objects.equals(groupId, student.groupId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firstName, lastName, groupId);
+    }
 }
