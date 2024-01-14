@@ -7,6 +7,7 @@ import dev.alexcoss.model.Student;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.function.Consumer;
 
 public abstract class AbstractAction implements Action {
@@ -25,27 +26,29 @@ public abstract class AbstractAction implements Action {
         });
     }
 
-    protected void processStudentById(Consumer<Integer> action, String actionName) {
+    protected void processStudentById(Scanner scanner, Consumer<Integer> action, String actionName) {
         System.out.print("Enter the student ID: ");
-        if (commandInputScanner.getScanner().hasNextInt()) {
-            int studentId = commandInputScanner.getScanner().nextInt();
+        if (scanner.hasNextInt()) {
+            int studentId = scanner.nextInt();
+            scanner.nextLine();
             action.accept(studentId);
             System.out.println(actionName + studentId);
         } else {
             System.out.println("Invalid input. Please enter a valid integer for the student ID.");
+            scanner.nextLine();
         }
-        commandInputScanner.getScanner().nextLine();
     }
 
-    protected void processStudentInCourse(Consumer<Map<Integer, Integer>> action, String actionName) {
+    protected void processStudentInCourse(Scanner scanner, Consumer<Map<Integer, Integer>> action, String actionName) {
         printListOfCourses();
+        scanner.nextLine();
 
         System.out.print("Enter the course name: ");
-        String inputCourseName = commandInputScanner.getScanner().nextLine();
+        String inputCourseName = scanner.nextLine();
 
         System.out.print("Enter the student ID: ");
-        if (commandInputScanner.getScanner().hasNextInt()) {
-            int studentId = commandInputScanner.getScanner().nextInt();
+        if (scanner.hasNextInt()) {
+            int studentId = scanner.nextInt();
             Student student = commandInputScanner.getStudentDao().getStudentById(studentId);
 
             List<Course> courses = commandInputScanner.getCourseDao().getAllItems();
@@ -69,6 +72,6 @@ public abstract class AbstractAction implements Action {
         } else {
             System.out.println("Invalid input. Please enter a valid integer for the student ID.");
         }
-        commandInputScanner.getScanner().nextLine();
+        scanner.nextLine();
     }
 }

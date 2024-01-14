@@ -4,6 +4,7 @@ import dev.alexcoss.console.CommandInputScanner;
 import dev.alexcoss.model.Student;
 
 import java.util.List;
+import java.util.Scanner;
 
 public class FindAllStudentsRelatedToCourseAction extends AbstractAction {
     public FindAllStudentsRelatedToCourseAction(CommandInputScanner commandInputScanner) {
@@ -11,11 +12,13 @@ public class FindAllStudentsRelatedToCourseAction extends AbstractAction {
     }
 
     @Override
-    public void execute() {
+    public void execute(Scanner scanner) {
         printListOfCourses();
 
+        scanner.nextLine();
+
         System.out.print("Enter the course name: ");
-        String courseName = commandInputScanner.getScanner().nextLine();
+        String courseName = scanner.nextLine();
 
         System.out.println("Executing command 2: Find all students related to the course with the given name " + courseName);
 
@@ -24,6 +27,7 @@ public class FindAllStudentsRelatedToCourseAction extends AbstractAction {
             System.out.println("No students found for this course title " + courseName);
         } else {
             studentsByCourse.forEach(System.out::println);
+
         }
     }
 }

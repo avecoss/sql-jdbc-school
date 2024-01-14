@@ -11,7 +11,6 @@ import java.util.*;
 public class CommandInputScanner {
     private static final String EXIT_COMMAND = "exit";
 
-    private Scanner scanner;
     private final StudentDao studentDao;
     private final GroupDao groupDao;
     private final CourseDao courseDao;
@@ -31,32 +30,23 @@ public class CommandInputScanner {
         int commandsCount = commands.size() - 1;
         boolean isRunning = true;
 
-        try {
-            scanner = new Scanner(System.in);
+        try (Scanner scanner = new Scanner(System.in)) {
 
             while (isRunning) {
                 System.out.println("Enter a command:");
                 if (scanner.hasNextInt()) {
                     int number = scanner.nextInt();
-                    processIntegerInput(commandsCount, number);
+                    processIntegerInput(commandsCount, number, scanner);
                 } else {
                     String line = scanner.nextLine();
                     if (EXIT_COMMAND.equals(line)) {
                         isRunning = false;
                     } else {
-                        printMessage("Invalid input. Please enter a valid command or 'exit' to close the application.");
+                        System.out.println("Invalid input. Please enter a valid command or 'exit' to close the application.");
                     }
                 }
             }
-        } finally {
-            if (scanner != null) {
-                scanner.close();
-            }
         }
-    }
-
-    public Scanner getScanner() {
-        return scanner;
     }
 
     public StudentDao getStudentDao() {
@@ -75,20 +65,20 @@ public class CommandInputScanner {
         return studentsCoursesDao;
     }
 
-    private void processIntegerInput(int commandsCount, int number) {
+    private void processIntegerInput(int commandsCount, int number, Scanner scanner) {
         if (number >= 0 && number <= commandsCount) {
-            executeCommand(number);
+            executeCommand(number, scanner);
         } else {
-            printMessage("Invalid command number. Please enter a valid command.");
+            System.out.println("Invalid command number. Please enter a valid command.");
         }
     }
 
-    private void executeCommand(int commandNumber) {
+    private void executeCommand(int commandNumber, Scanner scanner) {
         Action action = actions.get(commandNumber);
         if (action != null) {
-            action.execute();
+            action.execute(scanner);
         } else {
-            printMessage("Invalid command number. Please enter a valid command.");
+            System.out.println("Invalid command number. Please enter a valid command.");
         }
     }
 
@@ -100,9 +90,5 @@ public class CommandInputScanner {
         actions.put(4, new DeleteStudentByIdAction(this));
         actions.put(5, new AddStudentToCourseAction(this));
         actions.put(6, new RemoveStudentFromCourseAction(this));
-    }
-
-    private void printMessage(String message) {
-        System.out.println(message);
     }
 }

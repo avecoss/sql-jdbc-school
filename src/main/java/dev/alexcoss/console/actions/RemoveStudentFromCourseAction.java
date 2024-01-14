@@ -1,8 +1,9 @@
 package dev.alexcoss.console.actions;
 
 import dev.alexcoss.console.CommandInputScanner;
-import dev.alexcoss.console.actions.AbstractAction;
 import dev.alexcoss.dao.StudentsCoursesDao;
+
+import java.util.Scanner;
 
 public class RemoveStudentFromCourseAction extends AbstractAction {
     public RemoveStudentFromCourseAction(CommandInputScanner commandInputScanner) {
@@ -10,8 +11,8 @@ public class RemoveStudentFromCourseAction extends AbstractAction {
     }
 
     @Override
-    public void execute() {
+    public void execute(Scanner scanner) {
         StudentsCoursesDao studentsCoursesDao = commandInputScanner.getStudentsCoursesDao();
-        processStudentInCourse(studentsCoursesDao::removeItems, "remove");
+        processStudentInCourse(scanner, studentsCoursesDao::removeItems, "remove");
     }
 }
