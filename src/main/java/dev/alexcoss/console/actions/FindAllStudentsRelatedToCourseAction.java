@@ -1,6 +1,7 @@
 package dev.alexcoss.console.actions;
 
 import dev.alexcoss.console.CommandInputScanner;
+import dev.alexcoss.model.Course;
 import dev.alexcoss.model.Student;
 
 import java.util.List;
@@ -13,7 +14,8 @@ public class FindAllStudentsRelatedToCourseAction extends AbstractAction {
 
     @Override
     public void execute(Scanner scanner) {
-        printListOfCourses();
+        List<Course> courses = commandInputScanner.getCourseDao().getAllItems();
+        CoursePrinter.printListOfCourses(courses);
 
         scanner.nextLine();
 

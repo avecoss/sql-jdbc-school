@@ -5,6 +5,7 @@ import dev.alexcoss.console.actions.AbstractAction;
 import dev.alexcoss.dao.StudentDao;
 
 import java.util.Scanner;
+import java.util.function.Consumer;
 
 public class DeleteStudentByIdAction extends AbstractAction {
     public DeleteStudentByIdAction(CommandInputScanner commandInputScanner) {
@@ -14,6 +15,6 @@ public class DeleteStudentByIdAction extends AbstractAction {
     @Override
     public void execute(Scanner scanner) {
         StudentDao studentDao = commandInputScanner.getStudentDao();
-        processStudentById(scanner, studentDao::removeStudentById, "Executing command 4: Delete a student by ID: ");
+        StudentProcessor.processStudentById(scanner, studentDao::removeStudentById, "Executing command 4: Delete a student by ID: ");
     }
 }

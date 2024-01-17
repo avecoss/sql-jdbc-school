@@ -4,6 +4,7 @@ import dev.alexcoss.console.CommandInputScanner;
 import dev.alexcoss.model.Student;
 
 import java.util.Scanner;
+import java.util.function.Consumer;
 
 public class PrintStudentByIdAction extends AbstractAction {
 
@@ -13,7 +14,7 @@ public class PrintStudentByIdAction extends AbstractAction {
 
     @Override
     public void execute(Scanner scanner) {
-        processStudentById(scanner, studentId -> {
+        StudentProcessor.processStudentById(scanner, studentId -> {
                 Student student = commandInputScanner.getStudentDao().getStudentById(studentId);
                 if (student != null) {
                     System.out.println("Student: " + student);

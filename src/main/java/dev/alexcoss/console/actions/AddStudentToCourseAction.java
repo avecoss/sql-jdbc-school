@@ -7,13 +7,14 @@ import dev.alexcoss.dao.StudentsCoursesDao;
 import java.util.Scanner;
 
 public class AddStudentToCourseAction extends AbstractAction {
+    private static final String ACTION_NAME = "add";
+
     public AddStudentToCourseAction(CommandInputScanner commandInputScanner) {
         super(commandInputScanner);
     }
 
     @Override
     public void execute(Scanner scanner) {
-        StudentsCoursesDao studentsCoursesDao = commandInputScanner.getStudentsCoursesDao();
-        processStudentInCourse(scanner, studentsCoursesDao::addItem, "add");
+        StudentInCourseProcessor.processStudentInCourse(scanner, commandInputScanner, ACTION_NAME);
     }
 }

@@ -6,13 +6,14 @@ import dev.alexcoss.dao.StudentsCoursesDao;
 import java.util.Scanner;
 
 public class RemoveStudentFromCourseAction extends AbstractAction {
+    private static final String ACTION_NAME = "remove";
+
     public RemoveStudentFromCourseAction(CommandInputScanner commandInputScanner) {
         super(commandInputScanner);
     }
 
     @Override
     public void execute(Scanner scanner) {
-        StudentsCoursesDao studentsCoursesDao = commandInputScanner.getStudentsCoursesDao();
-        processStudentInCourse(scanner, studentsCoursesDao::removeItems, "remove");
+        StudentInCourseProcessor.processStudentInCourse(scanner, commandInputScanner, ACTION_NAME);
     }
 }

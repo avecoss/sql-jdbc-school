@@ -19,12 +19,10 @@ public abstract class AbstractDatabaseManager {
 
     void handleSQLException(SQLException e, String message) {
         logSQLException(Level.SEVERE, e, message, null);
-        throw new DatabaseManagerException(buildFullMessage(message, null), e);
     }
 
     void handleSQLException(SQLException e, String message, String sql) {
         logSQLException(Level.SEVERE, e, message, sql);
-        throw new DatabaseManagerException(buildFullMessage(message, sql), e);
     }
 
     private Logger initializeLogger(String loggerName) {

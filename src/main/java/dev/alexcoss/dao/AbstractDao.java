@@ -18,6 +18,5 @@ public abstract class AbstractDao<T, E> extends AbstractDatabaseManager implemen
     protected void handleSQLException(SQLException e, String message, String sql, Object... params) {
         String fullMessage = String.format("%s\nSQL: %s\nParameters: %s", message, sql, Arrays.toString(params));
         logger.log(Level.SEVERE, fullMessage, e);
-        throw new DaoException(fullMessage, e);
     }
 }

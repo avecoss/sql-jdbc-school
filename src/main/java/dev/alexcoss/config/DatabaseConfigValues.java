@@ -1,5 +1,7 @@
 package dev.alexcoss.config;
 
+import dev.alexcoss.util.JdbcPropertiesReader;
+
 public class DatabaseConfigValues {
     private static String url;
     private static String username;
@@ -7,34 +9,22 @@ public class DatabaseConfigValues {
 
     public static String getUrl() {
         if (url == null) {
-            DatabaseConfigInitializer.initialize(DatabaseConfig.URL);
+            url = new JdbcPropertiesReader().getJdbcUrl();
         }
         return url;
     }
 
     public static String getUsername() {
         if (username == null) {
-            DatabaseConfigInitializer.initialize(DatabaseConfig.USERNAME);
+            username = new JdbcPropertiesReader().getJdbcUsername();
         }
         return username;
     }
 
     public static String getPassword() {
         if (password == null) {
-            DatabaseConfigInitializer.initialize(DatabaseConfig.PASSWORD);
+            password = new JdbcPropertiesReader().getJdbcPassword();
         }
         return password;
-    }
-
-    static void setUrl(String value) {
-        url = value;
-    }
-
-    static void setUsername(String value) {
-        username = value;
-    }
-
-    static void setPassword(String value) {
-        password = value;
     }
 }
