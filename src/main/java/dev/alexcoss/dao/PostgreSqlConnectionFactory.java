@@ -1,6 +1,6 @@
 package dev.alexcoss.dao;
 
-import dev.alexcoss.config.DatabaseConfigValues;
+import dev.alexcoss.util.JdbcPropertiesReader;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -8,13 +8,19 @@ import java.sql.SQLException;
 
 public class PostgreSqlConnectionFactory implements ConnectionFactory {
 
-    private static final String URL = DatabaseConfigValues.getUrl();
-    private static final String USERNAME = DatabaseConfigValues.getUsername();
-    private static final String PASSWORD = DatabaseConfigValues.getPassword();
+    private final String url;
+    private final String username;
+    private final String password;
 
+    public PostgreSqlConnectionFactory() {
+        JdbcPropertiesReader reader = new JdbcPropertiesReader();
+        this.url = reader.getJdbcUrl();
+        this.username = reader.getJdbcUsername();
+        this.password = reader.getJdbcPassword();
+    }
 
     @Override
     public Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, USERNAME, PASSWORD);
+        return DriverManager.getConnection(url, username, password);
     }
 }
